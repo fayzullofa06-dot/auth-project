@@ -4,7 +4,7 @@
 import { Link } from 'react-router-dom';
 import { RiArrowRightDownLongLine,} from "react-icons/ri";
 import { RiArrowRightUpLongLine } from "react-icons/ri";
-
+ import { getData, } from '../../features/service/TransactionSlice'
 const categoryColors = {
   'Ovqat': 'bg-blue-500',
   'Transport': 'bg-green-500',
@@ -13,15 +13,17 @@ const categoryColors = {
 }
   export default function Dashboard() {
     const [animate,setAnimate]=useState(false)
-    useEffect(() => {
-      
+    const dispatch=useDispatch()
+   
+
+useEffect(() => {
+  dispatch(getData())  
+  setTimeout(() => {
+    setAnimate(true)
+  }, 100)
+}, [])
     
-    setTimeout(() => {
-      setAnimate(true)
-    }, 100);
-    }, [])
-    
-  const dispatch=useDispatch()//for sending data to the redux
+  //for sending data to the redux
   const {items,loading,error}=useSelector(
     (state)=>state.transactions//so we wrote in our store,js like the transactions transactionReducer so this become transactions so it is our slice with data so like transactions is our object it has items and loading and error just we are destructing it but we could to other ways but it would be so much  like state.transactions.items or so on 
   )

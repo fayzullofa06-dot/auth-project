@@ -1,19 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect } from 'react'
 import { FaPlus } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RiArrowRightDownLongLine,} from "react-icons/ri";
 import { RiArrowRightUpLongLine } from "react-icons/ri";
-import { FiEdit,FiTrash } from 'react-icons/fi';
-export default function Transaction() {
-  const [filter,setFilter]=useState('all')
-  const{items}=useSelector(state=>state.transactions)
-  
+import { MdOutlineEdit } from "react-icons/md";
+import { RiDeleteBin5Line } from "react-icons/ri";
+import { getData,deleteData } from '../../features/service/TransactionSlice'
 
- const filteredItems = items.filter(item => {
-  if(filter === 'income') return item.amount > 0
-  if(filter === 'expense') return item.amount < 0
-  return true
+export default function Transaction() {
+   const [filter,setFilter]=useState('all')
+   const[value,setValue]=useState('')
+const {items}=useSelector(state=>state.transactions)
+const dispatch=useDispatch()
+
+useEffect(() => {
+  
+dispatch(getData())
+ 
+}, [])
+
+const filtered=items.filter(items=>{
+  const switching=filter==='all'||(filter==='income'&&items.amount>0)||
+  (filter==='expense'&&items.amount<0)
+  const matching=items.title.toLowerCase().includes(value.toLowerCase())
+  return  switching && matching
 })
   return (
     <div>
@@ -38,41 +49,51 @@ export default function Transaction() {
      {/*  for the filter */}
         <div className=' flex relative'>
           <CiSearch size={18} className='absolute left-3 top-2 '/>
-          <input type="search" placeholder='Search' className='  p-1 rounded-[10px] bg-[#F3F3F5]  min-w-50 md:min-w-150 lg:min-w-200  pl-9  '  />
+          <input type="search" placeholder='Search' className='  p-1 rounded-[10px] bg-[#F3F3F5]  min-w-50 md:min-w-140 lg:min-w-96 2xl:min-w-200  pl-9  '  value={value} onChange={(e)=>setValue(e.target.value)}/>
            </div>
            <div className='flex gap-3 '>
-      <button className='bg-[#030213]  rounded-[10px] p-1 min-w-20 text-white' onClick={()=>setFilter('all')}>All</button>
-      <button className='bg-[#FFFFFF]  rounded-[10px] p-1 min-w-20 border-t-[0.63px] border-[#0000001A] text-black'  onClick={()=>setFilter('income')}>Income</button>
-      <button className='rounded-[10px] p-1 min-w-20 bg-white text-black border-t-[0.63px] border-[#0000001A]'  onClick={()=>setFilter('expense')}>Expenses</button>
+      <button onClick={()=>setFilter('all')} className='bg-[#030213]  rounded-[10px] p-1 min-w-20 text-white' >All</button>
+      <button className='bg-[#FFFFFF]  rounded-[10px] p-1 min-w-20 border-t-[0.63px] border-[#0000001A] text-black' onClick={()=>setFilter('income')} >Income</button>
+      <button className='rounded-[10px] p-1 min-w-20 bg-white text-black border-t-[0.63px] border-[#0000001A]'onClick={()=>setFilter('expense')}>Expenses</button>
       </div>
-      </div>{filteredItems.map(item => (
-  <div key={item.id} className='flex items-center gap-3 px-7 py-4 border-b border-gray-100'>
+      </div>
+      </div>
+    {filtered.map(items=>(
+      <div key={items.id} className='flex justify-between py-4 px-7'>
+       {items.amount>0?(
+        <RiArrowRightDownLongLine size={44} className='p-2.5 text-[green] rounded-[20px] bg-[#DCFCE7]'/>
+       ):(<RiArrowRightUpLongLine  size={44}className='  p-2.5 text-[red] rounded-[20px] bg-[#FFE2E2]' />)}
+       
+             <div className='ml-4'>
+        <h3 className='text-[#0A0A0A] font-[Inter] font-medium text-[16px]'>{items.title}</h3>
+        <div className='flex gap-4'>
+        <p className='text-[#717182] font-[Inter]'>{items.category}</p>
+        <p className='font-[Inter] text-[14px] text-[#717182]'>{items.date}</p>
+        </div>
+      </div>
+     {/*  the date and the expenses */}
+      <div  className='text-right ml-auto'>
+      <div className='flex gap-5'>
+        <p  className= {` ${items.amount>0 ? 'text-[#00A63E]':'text-[#E7000B]'} font-semibold font-[Inter] text-[16px] `}>{`${items.amount.toLocaleString('uz-UZ')} so'm`} 
+         </p>
+        <button ><MdOutlineEdit/></button> 
+         <button onClick={()=>{
+          if(window.confirm("Are u sure to delete"))
+            dispatch(deleteData(items.id))
+         }}><RiDeleteBin5Line/></button>
+          </div>
+  
+
+          
+       
+        
+      </div>
+       
+    </div>
+
     
-    {/* icon */}
-    {item.amount > 0 ? (
-      <RiArrowRightDownLongLine size={44} className='p-2.5 text-[green] rounded-[20px] bg-[#DCFCE7]' />
-    ) : (
-      <RiArrowRightUpLongLine size={44} className='p-2.5 text-[red] rounded-[20px] bg-[#FFE2E2]' />
-    )}
-
-    {/* title and category + date */}
-    <div>
-      <h3 className='font-[Inter] font-medium text-[16px] text-[#0A0A0A]'>{item.title}</h3>
-      <p className='text-[#717182] text-[14px]'>{item.category} •  {item.date}</p>
-    </div>
-
-    {/* amount + edit/delete */}
-    <div className='ml-auto flex items-center gap-4'>
-      <p className={`font-semibold text-[16px] ${item.amount > 0 ? 'text-[#00A63E]' : 'text-[#E7000B]'}`}>
-        {item.amount > 0 ? '+' : ''}{new Intl.NumberFormat('en-US').format(item.amount)} so'm
-      </p>
-      <FiEdit size={16} className='text-gray-400 cursor-pointer' />
-      <FiTrash size={16} className='text-red-400 cursor-pointer' />
-    </div>
-
-  </div>
-))}
-      </div>
+      
+    ))}
     </div>
     </div>
   )
