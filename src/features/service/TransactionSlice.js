@@ -25,6 +25,16 @@ export const deleteData=createAsyncThunk('transaction/deleteData',async(id,{reje
    return  rejectWithValue(error.message)
   }
 })
+export const addData=createAsyncThunk('transaction/addData',async(newTransaction,{rejectWithValue})=>{
+  try {
+    const re=  await axios.post(Api,newTransaction)
+    return re.data
+  } catch (error) {
+    rejectWithValue(error.message)
+    
+  }
+})
+
 const transactionSlice=createSlice({
   name:'transactions',
    initialState,
@@ -54,6 +64,18 @@ const transactionSlice=createSlice({
     .addCase(deleteData.rejected,(state,action)=>{
       state.loading=false
       state.error=action.payload
+    })
+    .addCase(addData.pending,(state)=>{
+      state.loading=true
+    })
+    .addCase(addData.fulfilled,(state,action)=>{
+      state.loading=false
+      state.items.push(action.payload)
+    })
+    .addCase(addData.rejected,(state,action)=>{
+      state.loading=false
+      state.error = action.payload;
+
     })
   }
 

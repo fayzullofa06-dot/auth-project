@@ -7,9 +7,11 @@ import { RiArrowRightUpLongLine } from "react-icons/ri";
 import { MdOutlineEdit } from "react-icons/md";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { getData,deleteData } from '../../features/service/TransactionSlice'
+import Modal from '../../components/modal/Modal';
 
 export default function Transaction() {
    const [filter,setFilter]=useState('all')
+   const[open,setOpen]=useState(false)
    const[value,setValue]=useState('')
 const {items}=useSelector(state=>state.transactions)
 const dispatch=useDispatch()
@@ -33,10 +35,14 @@ const filtered=items.filter(items=>{
  <h1 className='font-[Inter] text-3xl font-semibold text-[#0A0A0A] '>Transactions</h1>
       <p className='text-[#717182] font-normal text-[16px]  '>All the Expenses and incomes</p>
       </div>
-  <button className='flex items-center gap-2 bg-[#030213] text-white rounded-[10px] h-10 py-3 sm:p-5  active:bg-[#062120] hover:bg-[#062120]'>
+  <button onClick={()=>setOpen(true)} className='flex items-center gap-2 bg-[#030213] text-white rounded-[10px] h-10 py-3 sm:p-5  active:bg-[#062120] hover:bg-[#062120]'>
   <FaPlus  size={11}  className='text-white'/>
   New Transaction
 </button>
+{open &&(
+  <Modal onClose={()=>setOpen(false)}/>
+)}
+
     </div>
   {/*   main part */}
     <div className='min-h-dvh bg-white shadow-md mt-4 rounded-[14px] sm:mt-8'>
